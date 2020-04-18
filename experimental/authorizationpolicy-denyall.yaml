@@ -1,0 +1,10 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: egress-deny-all
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      gateway-name: egress-httpbin
+      gateway-type: egress

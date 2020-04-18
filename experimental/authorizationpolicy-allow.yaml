@@ -1,0 +1,17 @@
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: egress-allow
+  namespace: default
+spec:
+  selector:
+    matchLabels:
+      gateway-name: egress-httpbin
+      gateway-type: egress
+  rules:
+  - from:
+      - source:
+          principals: ["cluster.local/ns/default/sa/echo-a"]
+    to:
+      - operation:
+          methods: ["GET"]

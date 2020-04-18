@@ -1,0 +1,15 @@
+apiVersion: istio.banzaicloud.io/v1beta1
+kind: MeshGateway
+metadata:
+  name: egress-external
+  namespace: external
+spec:
+  maxReplicas: 1
+  minReplicas: 1
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 80
+  serviceType: ClusterIP
+  type: egress

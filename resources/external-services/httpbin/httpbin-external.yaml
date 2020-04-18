@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpbin
+  namespace: external
+spec:
+  type: ExternalName
+  externalName: egress-external.external.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: httpbin-local
+  namespace: default
+spec:
+  hosts:
+    - httpbin.external.svc.cluster.local
+  ports:
+    - number: 80
+      name: http
+      protocol: HTTP
+  resolution: DNS
+  location: MESH_EXTERNAL

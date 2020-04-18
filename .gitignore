@@ -1,0 +1,10 @@
+# IDE integration
+/.idea/
+!/.idea/copyright/
+!/.idea/*.iml
+!/.idea/externalDependencies.xml
+!/.idea/go.imports.xml
+!/.idea/modules.xml
+!/.idea/runConfigurations/
+!/.idea/scopes/
+!/.idea/sqldialects.xml

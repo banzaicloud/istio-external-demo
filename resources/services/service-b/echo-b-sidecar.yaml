@@ -1,0 +1,16 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: echo-b-google
+  namespace: default
+spec:
+  egress:
+    - hosts:
+        - ./*
+        - istio-system/*
+        - external/google.external.svc.cluster.local
+  workloadSelector:
+    labels:
+      k8s-app: echo-b
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY

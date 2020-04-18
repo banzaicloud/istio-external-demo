@@ -1,0 +1,12 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: default-restrict
+  namespace: default
+spec:
+  egress:
+    - hosts:
+        - ./*
+        - istio-system/*
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
