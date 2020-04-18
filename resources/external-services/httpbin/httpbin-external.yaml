@@ -11,7 +11,7 @@ apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
   name: httpbin-local
-  namespace: default
+  namespace: external
 spec:
   hosts:
     - httpbin.external.svc.cluster.local

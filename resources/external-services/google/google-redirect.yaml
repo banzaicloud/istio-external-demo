@@ -2,22 +2,13 @@ apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: google-egress
+  namespace: external
 spec:
   hosts:
     - google.com
   gateways:
     - external/egress-external
-    - mesh
   http:
-    - match:
-        - gateways:
-            - mesh
-          port: 80
-      route:
-        - destination:
-            host: google.external.svc.cluster.local
-            port:
-              number: 80
     - match:
         - gateways:
             - external/egress-external
@@ -25,6 +16,25 @@ spec:
       route:
         - destination:
             host: google.com
+            port:
+              number: 80
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: google-egress
+  namespace: default
+spec:
+  hosts:
+    - google.com
+  http:
+    - match:
+        - port: 80
+          sourceLabels:
+            k8s-app: echo-b
+      route:
+        - destination:
+            host: google.external.svc.cluster.local
             port:
               number: 80
 ---
