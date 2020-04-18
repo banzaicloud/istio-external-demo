@@ -1,11 +1,28 @@
 apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
+kind: ServiceEntry
 metadata:
-  name: httpbin-egress
+  name: google-external
   namespace: external
 spec:
   hosts:
-    - httpbin.org
+    - google.com
+  ports:
+    - number: 80
+      name: http
+      protocol: HTTP
+  resolution: DNS
+  location: MESH_EXTERNAL
+  exportTo:
+  - "."
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: google-egress
+  namespace: external
+spec:
+  hosts:
+    - google.com
   gateways:
     - external/egress-external
   http:
@@ -15,40 +32,25 @@ spec:
           port: 80
       route:
         - destination:
-            host: httpbin.org
+            host: google.com
             port:
               number: 80
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: httpbin-egress
+  name: google-egress
   namespace: default
 spec:
   hosts:
-    - httpbin.org
+    - google.com
   http:
     - match:
         - port: 80
           sourceLabels:
-            k8s-app: echo-a
+            k8s-app: echo-b
       route:
         - destination:
-            host: httpbin.external.svc.cluster.local
+            host: egress-external.external.svc.cluster.local
             port:
               number: 80
----
-apiVersion: networking.istio.io/v1alpha3
-kind: ServiceEntry
-metadata:
-  name: httpbin-external
-  namespace: external
-spec:
-  hosts:
-    - httpbin.org
-  ports:
-    - number: 80
-      name: http
-      protocol: HTTP
-  resolution: DNS
-  location: MESH_EXTERNAL
