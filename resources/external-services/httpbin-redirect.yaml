@@ -1,0 +1,56 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: httpbin-external
+  namespace: external
+spec:
+  hosts:
+    - httpbin.org
+  ports:
+    - number: 80
+      name: http
+      protocol: HTTP
+  resolution: DNS
+  location: MESH_EXTERNAL
+  exportTo:
+  - "."
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: httpbin-egress
+  namespace: external
+spec:
+  hosts:
+    - httpbin.org
+  gateways:
+    - external/egress-external
+  http:
+    - match:
+        - gateways:
+            - external/egress-external
+          port: 80
+      route:
+        - destination:
+            host: httpbin.org
+            port:
+              number: 80
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: httpbin-egress
+  namespace: default
+spec:
+  hosts:
+    - httpbin.org
+  http:
+    - match:
+        - port: 80
+          sourceLabels:
+            k8s-app: echo-a
+      route:
+        - destination:
+            host: egress-external.external.svc.cluster.local
+            port:
+              number: 80
