@@ -1,0 +1,18 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: echo-a-httpbin
+  namespace: default
+spec:
+  hosts:
+    - httpbin.org
+  http:
+    - match:
+        - port: 80
+          sourceLabels:
+            k8s-app: echo-a
+      route:
+        - destination:
+            host: egress-external.external.svc.cluster.local
+            port:
+              number: 80

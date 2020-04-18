@@ -7,6 +7,5 @@ spec:
   egress:
     - hosts:
         - ./*
-        - istio-system/*
   outboundTrafficPolicy:
     mode: REGISTRY_ONLY
