@@ -1,26 +1,20 @@
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: echo-b
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: echo-b
+  name: app-b
   labels:
-    k8s-app: echo-b
-  namespace: default
+    k8s-app: app-b
+  namespace: test-app
 spec:
   replicas: 1
   selector:
     matchLabels:
-      k8s-app: echo-b
+      k8s-app: app-b
   template:
     metadata:
       labels:
-        k8s-app: echo-b
+        k8s-app: app-b
     spec:
-      serviceAccountName: echo-b
       terminationGracePeriodSeconds: 2
       containers:
       - name: echo-service
@@ -31,14 +25,14 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: echo-b
+  name: app-b
   labels:
-    k8s-app: echo-b
-  namespace: default
+    k8s-app: app-b
+  namespace: test-app
 spec:
   ports:
   - name: http
     port: 80
     targetPort: 8080
   selector:
-    k8s-app: echo-b
+    k8s-app: app-b

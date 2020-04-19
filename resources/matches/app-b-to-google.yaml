@@ -1,18 +1,19 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: echo-a-httpbin
-  namespace: default
+  name: app-b-to-google
+  namespace: test-app
 spec:
   hosts:
-    - httpbin.org
+    - google.com
+    - www.google.com
   http:
     - match:
         - port: 80
           sourceLabels:
-            k8s-app: echo-a
+            k8s-app: app-b
       route:
         - destination:
-            host: egress-external.external.svc.cluster.local
+            host: egress-google.external.svc.cluster.local
             port:
               number: 80
