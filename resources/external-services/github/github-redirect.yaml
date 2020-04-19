@@ -1,12 +1,12 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: ServiceEntry
 metadata:
-  name: cnn-external
+  name: github-external
   namespace: external
 spec:
   hosts:
-    - cnn.com
-    - www.cnn.com
+    - github.com
+    - www.github.com
   ports:
     - number: 80
       name: http
@@ -19,21 +19,21 @@ spec:
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: cnn-egress
+  name: github-egress
   namespace: external
 spec:
   hosts:
-    - cnn.com
-    - www.cnn.com
+    - github.com
+    - www.github.com
   gateways:
-    - external/egress-cnn
+    - external/egress-github
   http:
     - match:
         - gateways:
-            - external/egress-cnn
+            - external/egress-github
           port: 80
       route:
         - destination:
-            host: cnn.com
+            host: github.com
             port:
               number: 80

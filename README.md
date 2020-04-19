@@ -20,12 +20,12 @@
 
 1. kubectl exec -n=test-app -ti <APP-A-POD-NAME> -- curl -s -o /dev/null -w "%{http_code}" httpbin.org
 
-1. kubectl exec -n=test-app -ti <APP-A-POD-NAME> -- curl -s -o /dev/null -w "%{http_code}" google.com
-
 1. kubectl exec -n=test-app -ti <APP-A-POD-NAME> -- curl -s -o /dev/null -w "%{http_code}" cnn.com
 
-1. kubectl exec -n=test-app -ti <APP-B-POD-NAME> -- curl -s -o /dev/null -w "%{http_code}" httpbin.org
+1. kubectl exec -n=test-app -ti <APP-A-POD-NAME> -- curl -s -o /dev/null -w "%{http_code}" google.com
 
 1. kubectl exec -n=test-app -ti <APP-B-POD-NAME> -- curl -s -o /dev/null -w "%{http_code}" google.com
+
+1. kubectl exec -n=test-app -ti <APP-B-POD-NAME> -- curl -s -o /dev/null -w "%{http_code}" httpbin.org
 
 1. kubectl exec -n=test-app -ti <APP-B-POD-NAME> -- curl -s -o /dev/null -w "%{http_code}" cnn.com
