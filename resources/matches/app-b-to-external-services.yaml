@@ -1,0 +1,47 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: app-b-to-external-services
+  namespace: test-app
+spec:
+  egress:
+    - hosts:
+        - ./*
+        - external/google.com
+  workloadSelector:
+    labels:
+      k8s-app: app-b
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: app-b-to-google
+  namespace: test-app
+spec:
+  hosts:
+    - google.com
+    - www.google.com
+  http:
+    - match:
+        - port: 80
+          sourceLabels:
+            k8s-app: app-b
+      route:
+        - destination:
+            host: egress-google.external.svc.cluster.local
+            port:
+              number: 80
+  tls:
+    - match:
+        - port: 443
+          sniHosts:
+            - google.com
+          sourceLabels:
+            k8s-app: app-b
+      route:
+        - destination:
+            host: egress-google.external.svc.cluster.local
+            port:
+              number: 443
