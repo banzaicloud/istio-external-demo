@@ -1,0 +1,39 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: ServiceEntry
+metadata:
+  name: cnn-external
+  namespace: external
+spec:
+  hosts:
+    - cnn.com
+    - www.cnn.com
+  ports:
+    - number: 80
+      name: http
+      protocol: HTTP
+  resolution: DNS
+  location: MESH_EXTERNAL
+  exportTo:
+  - "."
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: cnn-egress
+  namespace: external
+spec:
+  hosts:
+    - cnn.com
+    - www.cnn.com
+  gateways:
+    - external/egress-cnn
+  http:
+    - match:
+        - gateways:
+            - external/egress-cnn
+          port: 80
+      route:
+        - destination:
+            host: cnn.com
+            port:
+              number: 80
