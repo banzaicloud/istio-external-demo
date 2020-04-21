@@ -11,10 +11,13 @@ spec:
     - number: 80
       name: http
       protocol: HTTP
+    - number: 443
+      name: tls
+      protocol: TLS
   resolution: DNS
   location: MESH_EXTERNAL
   exportTo:
-  - "."
+  - "*"
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -37,3 +40,15 @@ spec:
             host: github.com
             port:
               number: 80
+  tls:
+    - match:
+        - gateways:
+            - external/egress-github
+          port: 443
+          sniHosts:
+            - github.com
+      route:
+        - destination:
+            host: github.com
+            port:
+              number: 443

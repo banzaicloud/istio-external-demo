@@ -1,0 +1,80 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Sidecar
+metadata:
+  name: app-a-to-external-services
+  namespace: test-app
+spec:
+  egress:
+    - hosts:
+        - ./*
+        - external/httpbin.org
+        - external/github.com
+  workloadSelector:
+    labels:
+      k8s-app: app-a
+  outboundTrafficPolicy:
+    mode: REGISTRY_ONLY
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: app-a-to-httpbin
+  namespace: test-app
+spec:
+  hosts:
+    - httpbin.org
+    - www.httpbin.org
+  http:
+    - match:
+        - port: 80
+          sourceLabels:
+            k8s-app: app-a
+      route:
+        - destination:
+            host: egress-httpbin.external.svc.cluster.local
+            port:
+              number: 80
+  tls:
+    - match:
+        - port: 443
+          sniHosts:
+            - httpbin.org
+          sourceLabels:
+            k8s-app: app-a
+      route:
+        - destination:
+            host: egress-httpbin.external.svc.cluster.local
+            port:
+              number: 443
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: app-a-to-github
+  namespace: test-app
+spec:
+  hosts:
+    - github.com
+    - www.github.com
+  http:
+    - match:
+        - port: 80
+          sourceLabels:
+            k8s-app: app-a
+      route:
+        - destination:
+            host: egress-github.external.svc.cluster.local
+            port:
+              number: 80
+  tls:
+    - match:
+        - port: 443
+          sniHosts:
+            - github.com
+          sourceLabels:
+            k8s-app: app-a
+      route:
+        - destination:
+            host: egress-github.external.svc.cluster.local
+            port:
+              number: 443
