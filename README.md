@@ -51,7 +51,6 @@ All other external services should be denied from the `test-app` namespace.
    ```
 
 1. Enable sidecar-injection for the `test-app` namespace.
-   (Optionally, the namespace could be labeled manually as well.)
 
    ```bash
    backyards sidecar-proxy auto-inject on test-app
