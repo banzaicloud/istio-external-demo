@@ -1,8 +1,8 @@
 # Restricting access to external services in Istio
 
-> This example setup was primarily prepared for this [blog post](https://banzaicloud.com/blog/istio-external-demo), where you can read more.
+> This example setup was primarily prepared for this [blog post](https://banzaicloud.com/blog/istio-external-demo/), where you can read more.
 
-## Goals with the demo
+## Goals of the demo
 
 - Deny access towards all external services by default (from a particular application namespace)
 - Explicitly whitelist which applications are allowed to call which external services (even if applications are in the same namespace)
@@ -28,13 +28,15 @@ All other external services should be denied from the `test-app` namespace.
 
 ### Setup
 
-1. Create a Kubernetes cluster
+1. Create a Kubernetes cluster.
 
    > If you need a hand with that, you can create a cluster with the free version of [Banzai Cloud's Pipeline platform](https://beta.banzaicloud.io/).
 
-1. Point `KUBECONFIG` for your cluster
+1. Point `KUBECONFIG` to your cluster.
 
-1. Run:
+1. [Register for an evaluation version](https://banzaicloud.com/products/try-backyards/).
+1. Install Backyards:
+
    ```bash
    curl https://getbackyards.sh | sh && backyards install -a
    ```
@@ -43,99 +45,99 @@ All other external services should be denied from the `test-app` namespace.
    > Note: [Backyards](https://banzaicloud.com/products/backyards/) is Banzai Cloud's service-mesh product based on Istio. You can freely test and evaluate it in non-production environments. [Contact us](https://banzaicloud.com/contact/) if you'd like to use Backyards in production.
 
    This step usually takes a few minutes, it installs Istio and Backyards on your cluster.
+1. Create a namespace for the test applications:
 
-1. Run:
    ```bash
    kubectl create ns test-app
    ```
 
    We will place our sample applications in the `test-app` namespace.
+1. Enable sidecar-injection for the `test-app` namespace.
+   (Optionally, the namespace could be labeled manually as well.)
 
-1. Run:
    ```bash
    backyards sidecar-proxy auto-inject on test-app
    ```
 
-   We turn on sidecar-injection for the `test-app` namespace with the above command.
-   (Optionally, the namespace could be labeled manually as well.)
-   
-1. Run:
+1. Make sure that the `test-app` namespace has the necessary `istio-injection=enabled` label. (If it is not there yet, wait a few seconds and check again.)
+
    ```bash
    kubectl get ns test-app --show-labels
    ```
-   
-   We run this command to make sure that the `test-app` namespace has the necessary `istio-injection=enabled` label on. (If not there yet, wait a few seconds and check again.)
 
-1. Run:
+1. Create a namespace for the external services. These will be accessible only for specific applications.
+
    ```bash
    kubectl create ns external
    ```
 
-   This is where the external services will be placed, which will be be only accessible for specific applications.
+1. Create all the resources for this demo in the `test-app` and `external` namespaces with the following command. These resources apply the rules described in the [Goals of the demo](#Goals-of-the-demo) section.
 
-1. Run:
    ```bash
    kubectl apply --recursive -f https://github.com/banzaicloud/istio-external-demo/tree/master/resources/
    ```
 
-   We create all the resources for this demo with the above command to the `test-app` and `external` namespaces.
-
 ### Explore
 
-1. Run:
+1. Save the application pod's names for easier access:
+
    ```bash
    APP_A_POD_NAME=$(kubectl get pods -n test-app -l k8s-app=app-a -o=jsonpath='{.items[0].metadata.name}')
    APP_B_POD_NAME=$(kubectl get pods -n test-app -l k8s-app=app-b -o=jsonpath='{.items[0].metadata.name}')
    ```
-   
-   We save the application pod's names for easier access.
 
-1. Run:
+1. Test that app-a can access the httpbin.org site:
+
    ```bash
    kubectl exec -n=test-app -ti $APP_A_POD_NAME -- curl -Ls -o /dev/null -w "%{http_code}" httpbin.org
    ```
-   
-    Should be 200, as we specifically whitelisted `app-a` --> `http(s)://httpbin.org`.
 
-1. Run:
+    The result should be 200, as we specifically whitelisted `app-a` --> `http(s)://httpbin.org`.
+
+1. Test that app-a can access the github.com site:
+
    ```bash
    kubectl exec -n=test-app -ti $APP_A_POD_NAME -- curl -Ls -o /dev/null -w "%{http_code}" github.com
    ```
-   
-    Should be 200, as we specifically whitelisted `app-a` --> `http(s)://github.com`.
 
-1. Run:
+    The result should be 200, as we specifically whitelisted `app-a` --> `http(s)://github.com`.
+
+1. Now try to access cnn.com:
+
    ```bash
    kubectl exec -n=test-app -ti $APP_A_POD_NAME -- curl -Ls -o /dev/null -w "%{http_code}" cnn.com
    ```
 
-    Should be 502, as it is not allowed explicitly.
+    The result should be 502, as it is not allowed explicitly.
 
-1. Run:
+1. Test that app-b can access google.com:
+
    ```bash
    kubectl exec -n=test-app -ti $APP_B_POD_NAME -- curl -Ls -o /dev/null -w "%{http_code}" google.com
    ```
-   
+
     Should be 200, as we specifically whitelisted `app-b` --> `http(s)://google.com`.
 
-1. Run:
+1. Test that app-b can access cnn.com:
+
    ```bash
    kubectl exec -n=test-app -ti $APP_B_POD_NAME -- curl -Ls -o /dev/null -w "%{http_code}" cnn.com
    ```
 
     Should be 502, as it is not allowed explicitly.
 
-1. Run:
+1. Check the topology of your mesh on the Backyards dashboard. Run:
+
    ```bash
    backyards dashboard
    ```
 
    If you create such traffic as mentioned above and checkout the `test-app` and `external` namespaces on the `TOPOLOGY` view, you should see something like this:
-   
+
    ![](/pics/by-topology.png)
-   
-   We can see basically the same on the Backyards UI, what we have described as the demo architecture earlier.
-   
+
+   You can see basically the same on the Backyards UI, what we have described as the demo architecture earlier.
+
 ## Cleanup
 
 1. Delete the demo resources:
@@ -152,4 +154,4 @@ All other external services should be denied from the `test-app` namespace.
    backyards uninstall -a
    ```
 
-> If you want to know more about Backyards, check out the [docs](https://banzaicloud.com/docs/backyards), our [blogs](https://banzaicloud.com/tags/backyards/), join the [backyards channel](https://community-banzaicloud.slack.com/archives/CNY0JRMEC) on our Slack or visit the [Backyards product page](https://banzaicloud.com/products/backyards/)!
+> If you want to know more about Backyards, check out the [docs](https://banzaicloud.com/docs/backyards/), our [blogs](https://banzaicloud.com/tags/backyards/), join the [backyards channel](https://community-banzaicloud.slack.com/archives/CNY0JRMEC) on our Slack, or visit the [Backyards product page](https://banzaicloud.com/products/backyards/)!
