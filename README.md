@@ -1,4 +1,4 @@
-# Restricting access to external services in Istio
+# Controlling egress traffic from Istio
 
 > This example setup was primarily prepared for this [blog post](https://banzaicloud.com/blog/istio-external-demo/), where you can read more.
 
@@ -34,24 +34,22 @@ All other external services should be denied from the `test-app` namespace.
 
 1. Point `KUBECONFIG` to your cluster.
 
-1. [Register for an evaluation version](https://banzaicloud.com/products/try-backyards/).
-1. Install Backyards:
+1. Install Istio with Backyards:
 
    ```bash
    curl https://getbackyards.sh | sh && backyards install -a
    ```
 
    In this demo, we install Istio with [Backyards](https://banzaicloud.com/products/backyards/), but the resources in this repo can be used on any Istio mesh.
-   > Note: [Backyards](https://banzaicloud.com/products/backyards/) is Banzai Cloud's service-mesh product based on Istio. You can freely test and evaluate it in non-production environments. [Contact us](https://banzaicloud.com/contact/) if you'd like to use Backyards in production.
+   > Note: [Backyards](https://banzaicloud.com/products/backyards/) is Banzai Cloud's service-mesh product based on Istio. You can freely test and [evaluate](https://banzaicloud.com/products/try-backyards/) it in non-production environments. [Contact us](https://banzaicloud.com/contact/) if you'd like to use Backyards in production.
 
    This step usually takes a few minutes, it installs Istio and Backyards on your cluster.
-1. Create a namespace for the test applications:
+1. Create `test-app` namespace for the example applications:
 
    ```bash
    kubectl create ns test-app
    ```
 
-   We will place our sample applications in the `test-app` namespace.
 1. Enable sidecar-injection for the `test-app` namespace.
    (Optionally, the namespace could be labeled manually as well.)
 
@@ -65,7 +63,7 @@ All other external services should be denied from the `test-app` namespace.
    kubectl get ns test-app --show-labels
    ```
 
-1. Create a namespace for the external services. These will be accessible only for specific applications.
+1. Create `external` namespace for the external services. These will be accessible only for specific applications.
 
    ```bash
    kubectl create ns external
@@ -86,7 +84,7 @@ All other external services should be denied from the `test-app` namespace.
    APP_B_POD_NAME=$(kubectl get pods -n test-app -l k8s-app=app-b -o=jsonpath='{.items[0].metadata.name}')
    ```
 
-1. Test that app-a can access the httpbin.org site:
+1. Test that app-a can access httpbin.org:
 
    ```bash
    kubectl exec -n=test-app -ti $APP_A_POD_NAME -- curl -Ls -o /dev/null -w "%{http_code}" httpbin.org
@@ -94,7 +92,7 @@ All other external services should be denied from the `test-app` namespace.
 
     The result should be 200, as we specifically whitelisted `app-a` --> `http(s)://httpbin.org`.
 
-1. Test that app-a can access the github.com site:
+1. Test that app-a can access github.com:
 
    ```bash
    kubectl exec -n=test-app -ti $APP_A_POD_NAME -- curl -Ls -o /dev/null -w "%{http_code}" github.com
@@ -102,7 +100,7 @@ All other external services should be denied from the `test-app` namespace.
 
     The result should be 200, as we specifically whitelisted `app-a` --> `http(s)://github.com`.
 
-1. Now try to access cnn.com:
+1. Now try to access cnn.com from app-a:
 
    ```bash
    kubectl exec -n=test-app -ti $APP_A_POD_NAME -- curl -Ls -o /dev/null -w "%{http_code}" cnn.com
@@ -118,7 +116,7 @@ All other external services should be denied from the `test-app` namespace.
 
     Should be 200, as we specifically whitelisted `app-b` --> `http(s)://google.com`.
 
-1. Test that app-b can access cnn.com:
+1. Now try to access cnn.com from app-b:
 
    ```bash
    kubectl exec -n=test-app -ti $APP_B_POD_NAME -- curl -Ls -o /dev/null -w "%{http_code}" cnn.com
@@ -126,7 +124,7 @@ All other external services should be denied from the `test-app` namespace.
 
     Should be 502, as it is not allowed explicitly.
 
-1. Check the topology of your mesh on the Backyards dashboard. Run:
+1. Check the topology of your mesh on the Backyards dashboard:
 
    ```bash
    backyards dashboard
