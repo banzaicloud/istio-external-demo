@@ -40,13 +40,11 @@ spec:
             host: github.com
             port:
               number: 80
-  tls:
+  tcp:
     - match:
         - gateways:
             - external/egress-github
           port: 443
-          sniHosts:
-            - github.com
       route:
         - destination:
             host: github.com
