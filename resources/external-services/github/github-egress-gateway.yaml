@@ -19,6 +19,7 @@ spec:
   type: egress
   labels:
     app: egress-github
+    security.istio.io/tlsMode: istio
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
@@ -32,15 +33,17 @@ spec:
   servers:
     - port:
         number: 80
-        name: http
-        protocol: HTTP
+        name: https
+        protocol: HTTPS
       hosts:
-        - github.com
+        - "*"
+      tls:
+        mode: ISTIO_MUTUAL
     - port:
         number: 443
         name: tls
         protocol: TLS
       hosts:
-        - github.com
+        - "*"
       tls:
-        mode: PASSTHROUGH
+        mode: ISTIO_MUTUAL

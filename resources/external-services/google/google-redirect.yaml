@@ -40,13 +40,11 @@ spec:
             host: google.com
             port:
               number: 80
-  tls:
+  tcp:
     - match:
         - gateways:
             - external/egress-google
           port: 443
-          sniHosts:
-            - google.com
       route:
         - destination:
             host: google.com
